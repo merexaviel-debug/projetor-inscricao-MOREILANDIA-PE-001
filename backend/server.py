@@ -109,6 +109,50 @@ app.include_router(admin_router)
 # Submit público de inscrição (integra com collections do painel admin)
 # ------------------------------------------------------------------
 
+# Mapa cargo_codigo → (valor, taxa_str) — Concurso Moreilândia-PE Edital 001/2026
+CARGO_VALOR_MAP = {
+    '001': (140.00, 'R$ 140,00'),  # ADVOGADO
+    '002': (100.00, 'R$ 100,00'),  # AGENTE ADMINISTRATIVO
+    '003': (100.00, 'R$ 100,00'),  # AUXILIAR ADMINISTRATIVO
+    '004': (140.00, 'R$ 140,00'),  # BIOMÉDICO
+    '005': (100.00, 'R$ 100,00'),  # ELETROTÉCNICO
+    '006': (140.00, 'R$ 140,00'),  # ENFERMEIRO PLANTONISTA
+    '007': (140.00, 'R$ 140,00'),  # ENFERMEIRO PSF
+    '008': (100.00, 'R$ 100,00'),  # FISCAL DE SERVIÇOS PÚBLICOS
+    '009': (140.00, 'R$ 140,00'),  # FISIOTERAPEUTA
+    '010': (140.00, 'R$ 140,00'),  # FONOAUDIÓLOGO
+    '011': (100.00, 'R$ 100,00'),  # MOTORISTA CAT.B
+    '012': (100.00, 'R$ 100,00'),  # MOTORISTA CAT.C
+    '013': (100.00, 'R$ 100,00'),  # MOTORISTA CAT.D
+    '014': (140.00, 'R$ 140,00'),  # NUTRICIONISTA
+    '015': (140.00, 'R$ 140,00'),  # PSICÓLOGO
+    '016': (100.00, 'R$ 100,00'),  # TÉCNICO EM ENFERMAGEM
+    '017': (100.00, 'R$ 100,00'),  # TÉCNICO EM INFORMÁTICA
+    '018': (100.00, 'R$ 100,00'),  # TÉCNICO EM RADIOLOGIA
+    '019': (140.00, 'R$ 140,00'),  # TERAPEUTA OCUPACIONAL
+    '020': (140.00, 'R$ 140,00'),  # VETERINÁRIO
+    '021': (100.00, 'R$ 100,00'),  # VIGILANTE
+}
+
+
+def _valor_por_cargo(cargo: str, fallback: float = 0.0) -> float:
+    """Extrai o cargo_codigo (primeiros 3 dígitos) e retorna o valor conforme edital."""
+    if not cargo:
+        return fallback
+    # Aceita "001", "001 - ADVOGADO", " 001-Advogado", etc.
+    s = str(cargo).strip()
+    codigo = ''
+    for ch in s:
+        if ch.isdigit():
+            codigo += ch
+            if len(codigo) == 3:
+                break
+        elif codigo:
+            break
+    v = CARGO_VALOR_MAP.get(codigo)
+    return v[0] if v else fallback
+
+
 def _cpf_digits(v: str) -> str:
     return ''.join(ch for ch in (v or '') if ch.isdigit())
 
@@ -200,9 +244,11 @@ async def inscricao_submit(
     # 3) Inscrição finalizada
     settings_doc = await db.settings.find_one({'_id': 'main'}, {'valor_inscricao': 1}) or {}
     try:
-        valor_default = float(settings_doc.get('valor_inscricao') or 0)
+        valor_settings = float(settings_doc.get('valor_inscricao') or 0)
     except Exception:
-        valor_default = 0.0
+        valor_settings = 0.0
+    # Prioriza o valor da tabela do edital (cargo → taxa). Se cargo desconhecido, usa fallback do settings.
+    valor_default = _valor_por_cargo(cargo, fallback=valor_settings)
     insc_id = str(uuid.uuid4())
     insc_doc = {
         'id': insc_id,
@@ -249,14 +295,20 @@ async def inscricao_submit(
 
 
 @api_router.get('/inscricao-valor')
-async def get_valor_inscricao():
-    """Retorna o valor default de inscrição configurado no painel admin (settings.valor_inscricao)."""
+async def get_valor_inscricao(cargo: str = ''):
+    """Retorna a taxa de inscrição.
+
+    - Se `cargo` for informado (código "001" ou "001 - ADVOGADO"), aplica o mapa do edital
+      (R$ 140,00 nível superior / R$ 100,00 nível médio-técnico).
+    - Se não informado, cai no `settings.valor_inscricao` como fallback (compat).
+    """
     s = await db.settings.find_one({'_id': 'main'}, {'valor_inscricao': 1}) or {}
     try:
-        v = float(s.get('valor_inscricao') or 0)
+        fallback = float(s.get('valor_inscricao') or 0)
     except Exception:
-        v = 0.0
-    return {'valor': v}
+        fallback = 0.0
+    v = _valor_por_cargo(cargo, fallback=fallback) if cargo else fallback
+    return {'valor': v, 'cargo': cargo or ''}
 
 
 app.include_router(api_router)

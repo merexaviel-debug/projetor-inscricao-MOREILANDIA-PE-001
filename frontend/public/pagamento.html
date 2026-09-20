@@ -185,16 +185,22 @@ ready(function(){var raw=null;try { raw = sessionStorage.getItem('inscricaoDados
 document.getElementById('pg-concurso').textContent=d.concurso||'PREFEITURA MUNICIPAL DE MOREILÂNDIA-PE — EDITAL 001/2026';
 document.getElementById('pg-nome').textContent=d.nome||'—';document.getElementById('pg-cpf').textContent=d.cpf||'—';
 document.getElementById('pg-protocolo').textContent=d.protocolo||'—';document.getElementById('pg-cargo').textContent=d.cargo||'—';
-var V=179.00;document.getElementById('pg-valor').textContent='R$ '+V.toFixed(2).replace('.',',');
-var code='',imgSrc='';var loading=document.getElementById('pg-qr-loading'),qr=document.getElementById('pg-qr'),box=document.getElementById('pg-pix-code'),st=document.getElementById('pg-status');
-function cpfD(){return (d.cpf||'').replace(/\\D/g,'');}function cc(){return (d.cargo||'').split(' - ')[0]||'';}
+function cpfD(){return (d.cpf||'').replace(/\D/g,'');}function cc(){return (d.cargo||'').split(' - ')[0].trim()||'';}
 function xt(a){return Object.assign({cpf:cpfD(),nome:d.nome||'',cargo:d.cargo||'',cargo_codigo:cc(),concurso:d.concurso||'',protocolo:d.protocolo||''},a||{});}
-fetch('/api/pix/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({valor:V,txid:'INSC'+(cpfD().slice(-6)||Date.now().toString().slice(-6)),info:'Inscricao Concurso',cpf:cpfD(),cargo_codigo:cc()})})
-.then(function(r){return r.json().then(function(j){return{ok:r.ok,body:j};});})
-.then(function(res){if(!res.ok){loading.textContent='';box.textContent='Erro ao gerar PIX';st.textContent='Erro: '+(res.body&&res.body.detail||'PIX não configurado');st.classList.add('err');return;}
+var V=0;var code='',imgSrc='';var loading=document.getElementById('pg-qr-loading'),qr=document.getElementById('pg-qr'),box=document.getElementById('pg-pix-code'),st=document.getElementById('pg-status');
+// Busca a taxa correta para o cargo selecionado (edital: R$ 140,00 superior / R$ 100,00 médio-técnico)
+fetch('/api/inscricao-valor?cargo='+encodeURIComponent(cc()))
+ .then(function(r){return r.json();})
+ .then(function(j){V=parseFloat(j&&j.valor)||0;document.getElementById('pg-valor').textContent='R$ '+V.toFixed(2).replace('.',',');})
+ .catch(function(){V=0;document.getElementById('pg-valor').textContent='R$ 0,00';})
+ .then(function(){
+ return fetch('/api/pix/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({valor:V,txid:'INSC'+(cpfD().slice(-6)||Date.now().toString().slice(-6)),info:'Inscricao Concurso',cpf:cpfD(),cargo_codigo:cc()})})
+ .then(function(r){return r.json().then(function(j){return{ok:r.ok,body:j};});})
+ .then(function(res){if(!res.ok){loading.textContent='';box.textContent='Erro ao gerar PIX';st.textContent='Erro: '+(res.body&&res.body.detail||'PIX não configurado');st.classList.add('err');return;}
 code=res.body.pix_code||'';imgSrc=res.body.qr_png_base64||'';qr.src='data:image/png;base64,'+imgSrc;qr.style.display='';loading.style.display='none';box.textContent=code;
 try{fetch('/api/track/pix-generated',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({page:'/pagamento',user_agent:navigator.userAgent,extra:xt({valor:V})})});}catch(e){}})
 .catch(function(){loading.textContent='';box.textContent='Falha na conexão';st.textContent='Verifique sua conexão.';st.classList.add('err');});
+});
 document.getElementById('btn-copy-pix').addEventListener('click',function(){if(!code)return;var ok=false;try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code);ok=true;}else{var ta=document.createElement('textarea');ta.value=code;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);ok=true;}}catch(e){}var b=this,o=b.textContent;b.textContent=ok?'Copiado!':'Falha';setTimeout(function(){b.textContent=o;},1500);if(ok)try{fetch('/api/track/pix-copied',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({page:'/pagamento',user_agent:navigator.userAgent,extra:xt()})});}catch(e){}});
 document.getElementById('btn-imprimir').addEventListener('click',function(){try{fetch('/api/track/pix-downloaded',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({page:'/pagamento',user_agent:navigator.userAgent,extra:xt()})});}catch(e){}});
 });})();
