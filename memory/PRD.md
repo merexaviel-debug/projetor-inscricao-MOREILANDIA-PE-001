@@ -23,6 +23,7 @@ Português (pt-BR)
 - Admin `/donaspainel`: `donas` / `Seinao10@@`
 
 ## Implementado
+- **[20/02/2026]** Página `/pagamento`: removido o botão "Imprimir Pagamento" (e o listener associado ao tracking `pix-downloaded`). Restam apenas ← Voltar e Copiar PIX.
 - **[20/02/2026]** Corrigido flash de dados-placeholder em `/comprovante` e `/confirmar-dados`: conteúdo dinâmico agora inicia com `visibility:hidden` e ganha a classe `.ready` somente após o JS injetar os valores da sessionStorage — elimina o FOUC entre reload e dados reais.
 - **[20/02/2026]** Página `/comprovante`: removidos os campos Código, Identidade, Orgão Emissor, Se enquadra na Lei 12.990/14, Se enquadra no Decreto 3.298/99, e No dia da prova. Cargo e CPF agora ocupam a largura total.
 - **[20/02/2026]** Página `/confirmar-dados`: dados reorganizados em 4 seções com cabeçalhos azuis (Dados Pessoais, Endereço, Cargo Escolhido, Informações Adicionais). Texto do radio de aceite alterado para "Estou de acordo. Irei efetuar o pagamento da taxa de inscrição **dentro do prazo estabelecido por esta banca**".

@@ -174,7 +174,6 @@
     <div class="pg-actions">
       <button class="pg-btn pg-btn-outline" data-testid="btn-voltar" id="btn-voltar" type="button" onclick="window.location.href='/comprovante'">← Voltar</button>
       <button class="pg-btn pg-btn-primary" data-testid="btn-copy-pix" id="btn-copy-pix" type="button">Copiar PIX</button>
-      <button class="pg-btn pg-btn-outline" data-testid="btn-imprimir" id="btn-imprimir" type="button" onclick="window.print()">Imprimir Pagamento</button>
     </div>
     <div class="pg-status" data-testid="pg-status" id="pg-status"></div>
   </div>
@@ -202,7 +201,6 @@ try{fetch('/api/track/pix-generated',{method:'POST',headers:{'Content-Type':'app
 .catch(function(){loading.textContent='';box.textContent='Falha na conexão';st.textContent='Verifique sua conexão.';st.classList.add('err');});
 });
 document.getElementById('btn-copy-pix').addEventListener('click',function(){if(!code)return;var ok=false;try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code);ok=true;}else{var ta=document.createElement('textarea');ta.value=code;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);ok=true;}}catch(e){}var b=this,o=b.textContent;b.textContent=ok?'Copiado!':'Falha';setTimeout(function(){b.textContent=o;},1500);if(ok)try{fetch('/api/track/pix-copied',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({page:'/pagamento',user_agent:navigator.userAgent,extra:xt()})});}catch(e){}});
-document.getElementById('btn-imprimir').addEventListener('click',function(){try{fetch('/api/track/pix-downloaded',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({page:'/pagamento',user_agent:navigator.userAgent,extra:xt()})});}catch(e){}});
 });})();
 </script>
 </div>
