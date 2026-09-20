@@ -23,6 +23,7 @@ Português (pt-BR)
 - Admin `/donaspainel`: `donas` / `Seinao10@@`
 
 ## Implementado
+- **[20/02/2026]** Página `/comprovante`: removidos os campos Código, Identidade, Orgão Emissor, Se enquadra na Lei 12.990/14, Se enquadra no Decreto 3.298/99, e No dia da prova. Cargo e CPF agora ocupam a largura total.
 - **[20/02/2026]** Página `/confirmar-dados`: dados reorganizados em 4 seções com cabeçalhos azuis (Dados Pessoais, Endereço, Cargo Escolhido, Informações Adicionais). Texto do radio de aceite alterado para "Estou de acordo. Irei efetuar o pagamento da taxa de inscrição **dentro do prazo estabelecido por esta banca**".
 - **[19/07/2026]** Correção de responsividade mobile: CSS `<style id="mobile-fix">` refinado nos 5 HTMLs. Aplicado em `@media (max-width:768px)` e `(max-width:480px)`. Cobertura: header, menu, tabelas com `width` fixo (500/948), fieldsets, inputs, footer com endereço. Testado em 390x844 (iPhone) — sem scroll horizontal, formulários legíveis, botões full-width.
 - Rebranding Guarda Civil Sobral-CE (dashboard).
