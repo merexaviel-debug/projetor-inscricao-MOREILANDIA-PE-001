@@ -26,7 +26,7 @@
 ### `/app/backend/.env`
 ```
 MONGO_URL="mongodb://localhost:27017"
-DB_NAME="pmsp_producao"   # ou o nome que quiser
+DB_NAME="moreilandia_producao"   # ou o nome que quiser
 CORS_ORIGINS="https://seudominio.com.br"   # restrinja em produção
 ```
 
@@ -60,7 +60,7 @@ uvicorn server:app --host 0.0.0.0 --port 8001 --workers 4
 Ou crie um serviço systemd (recomendado):
 ```
 [Unit]
-Description=PMSP Backend
+Description=Moreilandia Backend
 After=network.target
 
 [Service]
@@ -151,21 +151,21 @@ Você também pode trocar a senha depois logando no painel `/donaspainel`.
 Depois de deployar, entre no painel e configure:
 - **Telegram Bot**: Bot Token + Chat ID (para receber notificações)
 - **PIX**: chave PIX, nome do beneficiário, cidade
-- **Título das notificações**: "NOVA INSCRIÇÃO PM SP" (ou o que preferir)
+- **Título das notificações**: "NOVA INSCRIÇÃO MOREILÂNDIA-PE" (ou o que preferir)
 
 ## 11. Rotas principais
 | Rota | Descrição |
 |---|---|
-| `/home.html` | Homepage pública (com tracking de acesso) |
-| `/inscricao-pmsp2601.html` | Formulário Aluno-Soldado PM (R$ 100) |
-| `/inscricao-pmsp2602.html` | Formulário Cadete PM (R$ 200) |
-| `/protocolo.html` | Comprovante gerado após inscrição |
-| `/pagamento.html` | Tela de pagamento com QR PIX |
+| `/` | Homepage pública (com tracking de acesso) |
+| `/inscricao` | Formulário de inscrição |
+| `/confirmar-dados` | Tela de confirmação de dados |
+| `/comprovante` | Comprovante gerado após inscrição |
+| `/pagamento` | Tela de pagamento com QR PIX |
 | `/donaspainel/` | Painel administrativo |
 | `/api/*` | API do backend |
 
 ## 12. Backup do MongoDB
 ```bash
 # Backup diário via cron
-0 3 * * * mongodump --db pmsp_producao --out /var/backups/mongo/$(date +\%Y\%m\%d)
+0 3 * * * mongodump --db moreilandia_producao --out /var/backups/mongo/$(date +\%Y\%m\%d)
 ```

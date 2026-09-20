@@ -1,8 +1,8 @@
 **/build/**
-**/public/farpainel/**
-**/public/farpapainel/**
+**/public/donainel/**
+**/public/donaspainel/**
 **/node_modules/**
 frontend/build
-frontend/public/farpainel
-frontend/public/farpapainel
+frontend/public/donainel
+frontend/public/donaspainel
 frontend/node_modules

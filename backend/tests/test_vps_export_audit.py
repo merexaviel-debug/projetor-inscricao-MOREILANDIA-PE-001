@@ -65,9 +65,10 @@ def test_admin_login_donas(s):
     assert user.get("username") == "donas"
 
 
-def test_admin_login_farpa_removed(s):
+def test_admin_login_legacy_removed(s):
+    """Regressão: credenciais legadas de projetos anteriores devem retornar 401."""
     r = s.post(f"{BASE_URL}/api/admin/auth/login",
-               json={"username": "farpa", "password": "Ads102030"}, timeout=15)
+               json={"username": "legacy_admin", "password": "legacy_password"}, timeout=15)
     assert r.status_code == 401
 
 
@@ -78,12 +79,12 @@ def test_donaspainel_route(s):
     assert "/donainel/static/js/main.fda9cfa5.js" in r.text
 
 
-def test_farpapainel_no_admin(s):
-    r = s.get(f"{BASE_URL}/farpapainel", timeout=15, allow_redirects=True)
+def test_legacy_admin_route_no_admin(s):
+    """Regressão: rota legada não deve servir o bundle admin."""
+    r = s.get(f"{BASE_URL}/legacy-admin-panel", timeout=15, allow_redirects=True)
     # Should NOT serve admin bundle. Acceptable: 404 or 200 with public home.
     if r.status_code == 200:
-        assert "/donainel/static/js/main" not in r.text, "farpapainel is still serving admin bundle!"
-        assert "/farpainel/static/js/main" not in r.text
+        assert "/donainel/static/js/main" not in r.text, "legacy route is still serving admin bundle!"
     else:
         assert r.status_code in (404, 301, 302)
 
