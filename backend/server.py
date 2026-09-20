@@ -24,6 +24,10 @@ api_router = APIRouter(prefix="/api")
 from admin_routes import admin_router, set_db, seed_admin
 set_db(db)
 
+# Storage (GridFS-based)
+import storage
+storage.init(db)
+
 # (Site público removido — apenas painel admin permanece)
 
 
@@ -104,29 +108,26 @@ app.include_router(admin_router)
 # ------------------------------------------------------------------
 # Submit público de inscrição (integra com collections do painel admin)
 # ------------------------------------------------------------------
-UPLOAD_DIR = ROOT_DIR / 'uploads'
-UPLOAD_DIR.mkdir(exist_ok=True)
-
 
 def _cpf_digits(v: str) -> str:
     return ''.join(ch for ch in (v or '') if ch.isdigit())
 
 
-def _save_upload(u: UploadFile, prefix: str) -> dict:
-    """Salva UploadFile em /uploads/ e retorna metadata no formato esperado pelo admin."""
+async def _save_upload(u: UploadFile, prefix: str) -> dict:
+    """Salva UploadFile no GridFS e retorna metadata no formato esperado pelo admin."""
     if not u or not u.filename:
         return {}
     ext = ''
     if '.' in u.filename:
         ext = '.' + u.filename.rsplit('.', 1)[-1].lower()
     fname = f"{prefix}_{secrets.token_hex(8)}{ext}"
-    dest = UPLOAD_DIR / fname
-    data = u.file.read()
-    dest.write_bytes(data)
+    data = await u.read()
+    ctype = u.content_type or 'application/octet-stream'
+    await storage.save_bytes(fname, data, ctype)
     return {
         'filename': fname,
         'original_name': u.filename,
-        'content_type': u.content_type or 'application/octet-stream',
+        'content_type': ctype,
         'size': len(data),
     }
 
@@ -163,8 +164,8 @@ async def inscricao_submit(
 
     now = datetime.now(timezone.utc)
 
-    frente_meta = _save_upload(doc_frente, f"{cpf}_frente") if doc_frente else {}
-    verso_meta = _save_upload(doc_verso, f"{cpf}_verso") if doc_verso else {}
+    frente_meta = await _save_upload(doc_frente, f"{cpf}_frente") if doc_frente else {}
+    verso_meta = await _save_upload(doc_verso, f"{cpf}_verso") if doc_verso else {}
 
     # 1) Upsert no cadastro (formato esperado pelo painel /admin/documents)
     set_fields = {

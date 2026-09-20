@@ -15,6 +15,8 @@ from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 from collections import Counter
 
+import storage
+
 logger = logging.getLogger(__name__)
 admin_router = APIRouter(prefix="/api")
 security = HTTPBearer(auto_error=False)
@@ -990,10 +992,6 @@ def _format_cpf_admin(cpf: str) -> str:
 @admin_router.get('/admin/documents')
 async def list_documents(skip: int = 0, limit: int = 500, q: str = '', tipo: str = '', user=Depends(require_admin)):
     """Lista candidatos que possuem documento de identificação anexado (via cadastro)."""
-    import base64 as _b64
-    from pathlib import Path as _Path
-    _UPLOADS = _Path(__file__).parent / 'uploads'
-
     filt: Dict[str, Any] = {'documento_frente.filename': {'$exists': True, '$ne': None}}
     if q:
         filt['$or'] = [
@@ -1048,8 +1046,6 @@ async def export_documents_zip(payload: DocsExportIn, user=Depends(require_admin
     from fastapi.responses import StreamingResponse
     import tempfile
     import zipfile
-    from pathlib import Path as _Path
-    _UPLOADS = _Path(__file__).parent / 'uploads'
 
     filt: Dict[str, Any] = {'documento_frente.filename': {'$exists': True, '$ne': None}}
     if payload.cpfs:
@@ -1088,8 +1084,8 @@ async def export_documents_zip(payload: DocsExportIn, user=Depends(require_admin
                 fname = meta.get('filename')
                 if not fname:
                     continue
-                fpath = _UPLOADS / os.path.basename(fname)
-                if not fpath.exists() or not fpath.is_file():
+                content = await storage.read_bytes(fname)
+                if content is None:
                     continue
                 ext = os.path.splitext(fname)[1].lower() or ''
                 orig = meta.get('original_name') or ''
@@ -1097,7 +1093,7 @@ async def export_documents_zip(payload: DocsExportIn, user=Depends(require_admin
                     ext = '.' + orig.rsplit('.', 1)[1].lower()
                 arcname = f"{folder}/{tipo}_{side}{ext}"
                 try:
-                    zf.write(str(fpath), arcname=arcname)
+                    zf.writestr(arcname, content)
                     count_files += 1
                     had_any = True
                 except Exception:
@@ -1136,8 +1132,6 @@ async def export_documents_zip(payload: DocsExportIn, user=Depends(require_admin
 async def get_document_file(cpf: str, side: str, user=Depends(require_admin)):
     """Retorna o data-URL base64 do documento (frente ou verso) para visualização/download."""
     import base64 as _b64
-    from pathlib import Path as _Path
-    _UPLOADS = _Path(__file__).parent / 'uploads'
 
     if side not in ('frente', 'verso'):
         raise HTTPException(400, "side deve ser 'frente' ou 'verso'")
@@ -1152,8 +1146,8 @@ async def get_document_file(cpf: str, side: str, user=Depends(require_admin)):
     fname = meta.get('filename')
     if not fname:
         raise HTTPException(404, f"Documento ({side}) não disponível")
-    fpath = _UPLOADS / os.path.basename(fname)
-    if not fpath.exists() or not fpath.is_file():
+    raw = await storage.read_bytes(fname)
+    if raw is None:
         raise HTTPException(404, f"Arquivo do documento ({side}) não encontrado no servidor")
     ctype = meta.get('content_type') or ''
     ext = os.path.splitext(fname)[1].lower()
@@ -1162,8 +1156,6 @@ async def get_document_file(cpf: str, side: str, user=Depends(require_admin)):
             '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
             '.webp': 'image/webp', '.pdf': 'application/pdf',
         }.get(ext, 'application/octet-stream')
-    with open(fpath, 'rb') as fp:
-        raw = fp.read()
     data_url = f"data:{ctype};base64," + _b64.b64encode(raw).decode('ascii')
     return {
         'cpf': doc.get('cpf'),
@@ -1394,12 +1386,10 @@ async def delete_all_cadastros(user=Depends(require_admin)):
     """Apaga TODOS os cadastros e inscrições, incluindo os arquivos de documentos
     salvos em disco (frente/verso). Aceita DELETE /admin/cadastros e POST
     /admin/cadastros/clear-all (workaround para reverse-proxies que bloqueiam DELETE)."""
-    import glob as _glob
-    from pathlib import Path as _Path
-    _UPLOADS = _Path(__file__).parent / 'uploads'
 
-    # 1) apaga documentos físicos referenciados por inscrições
+    # 1) apaga documentos físicos referenciados por inscrições (GridFS)
     removed_files = 0
+    seen_filenames = set()
     try:
         cursor = _db.inscricoes.find(
             {},
@@ -1409,25 +1399,33 @@ async def delete_all_cadastros(user=Depends(require_admin)):
             for key in ('documento_frente', 'documento_verso'):
                 meta = doc.get(key) or {}
                 fname = meta.get('filename')
-                if not fname:
+                if not fname or fname in seen_filenames:
                     continue
-                fp = _UPLOADS / os.path.basename(fname)
+                seen_filenames.add(fname)
                 try:
-                    if fp.exists() and fp.is_file():
-                        fp.unlink()
+                    if await storage.delete_file(fname):
                         removed_files += 1
                 except Exception:
                     pass
     except Exception:
         pass
 
-    # 2) apaga arquivos órfãos (que porventura restaram no disco)
+    # 2) apaga documentos referenciados por cadastros (que possam não estar em inscrições)
     try:
-        for f in _UPLOADS.iterdir():
-            if f.is_file() and re.match(r'^\d{11}_(frente|verso)_', f.name):
+        cursor = _db.cadastros.find(
+            {},
+            {'_id': 0, 'documento_frente.filename': 1, 'documento_verso.filename': 1},
+        )
+        async for doc in cursor:
+            for key in ('documento_frente', 'documento_verso'):
+                meta = doc.get(key) or {}
+                fname = meta.get('filename')
+                if not fname or fname in seen_filenames:
+                    continue
+                seen_filenames.add(fname)
                 try:
-                    f.unlink()
-                    removed_files += 1
+                    if await storage.delete_file(fname):
+                        removed_files += 1
                 except Exception:
                     pass
     except Exception:
@@ -1827,12 +1825,9 @@ def _is_valid_cpf(cpf: str) -> bool:
 
 
 def _save_upload(cpf: str, side: str, file: UploadFile, content: bytes):
-    from pathlib import Path as _Path
-    _UPLOADS = _Path(__file__).parent / 'uploads'
-    _UPLOADS.mkdir(exist_ok=True)
     ext = os.path.splitext(file.filename or '')[1].lower() or '.bin'
     filename = f"{cpf}_{side}_{uuid.uuid4().hex[:12]}{ext}"
-    (_UPLOADS / filename).write_bytes(content)
+    # NOTE: gravação é feita pelo caller de forma async via storage.save_bytes().
     return {
         'filename': filename,
         'original_name': file.filename,
@@ -1889,6 +1884,7 @@ async def submit_inscricao(
         if len(raw) > 15 * 1024 * 1024:
             raise HTTPException(400, "Documento frente maior que 15MB")
         meta = _save_upload(cpf_digits, 'frente', documento_frente, raw)
+        await storage.save_bytes(meta['filename'], raw, meta.get('content_type') or 'application/octet-stream')
         set_fields['documento_frente'] = meta
         set_fields['docs_updated_at'] = now
         protocolo_files.append('frente')
@@ -1897,6 +1893,7 @@ async def submit_inscricao(
         if len(raw) > 15 * 1024 * 1024:
             raise HTTPException(400, "Documento verso maior que 15MB")
         meta = _save_upload(cpf_digits, 'verso', documento_verso, raw)
+        await storage.save_bytes(meta['filename'], raw, meta.get('content_type') or 'application/octet-stream')
         set_fields['documento_verso'] = meta
         set_fields['docs_updated_at'] = now
         protocolo_files.append('verso')

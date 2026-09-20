@@ -1,0 +1,49 @@
+{
+  "summary": "Frontend-only CSS mobile fix validation for tbl-cargos table on homepage /. Verified fix works correctly on mobile (390x844) and no regressions on desktop (1920x800) nor on other tables of the same page.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_results": {
+    "mobile_390x844": {
+      "table_tbl_cargos_display": "table (correct, not stacked)",
+      "table_min_width": "900px (correct)",
+      "row_display": "table-row (correct)",
+      "cell_display": "table-cell (correct)",
+      "wrap_overflow_x": "auto (horizontal scroll works)",
+      "wrap_client_width": 304,
+      "table_scroll_width": 902,
+      "hint_pseudo_before_content": "⇔ Arraste para o lado para ver todas as colunas (visible, display:block)",
+      "body_scrollWidth_vs_innerWidth": "390 == 390 (NO body horizontal overflow — wrapper contains the scroll properly)",
+      "horizontal_scroll_verified": "scrollLeft=500 reveals right columns (R$ salary, C/H, Taxa)",
+      "other_tables_still_stacked": "Dados do Concurso and Arquivos Publicados tables retain display:block/block cells on mobile (no regression, desired behavior preserved)"
+    },
+    "desktop_1920x800": {
+      "table_display": "table",
+      "table_width": 894,
+      "wrap_width": 894,
+      "has_horizontal_scroll": false,
+      "hint_pseudo_before_content": "none (correctly hidden on desktop)",
+      "body_scrollWidth_vs_innerWidth": "1920 == 1920 (no overflow)"
+    },
+    "regressions_checked": {
+      "modal_aviso_importante": "Opens and closes correctly via 'Ok, entendi' button",
+      "fazer_inscricao_button": "Present and reachable in Dados do Concurso tab"
+    }
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "CSS fix implementation is clean and scoped: mobile-fix only overrides the .tbl-cargos-wrap + table.tbl-cargos, leaving other tables' block layout intact.",
+    "Hint text delivered via ::before pseudo-element correctly hidden on desktop (content:none) and shown on mobile — good separation of concerns.",
+    "No body-level horizontal overflow introduced by the wide (900px) table because overflow-x:auto is on the wrapper."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "100%"},
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "The tbl-cargos mobile CSS fix in /app/frontend/public/index.html is fully verified and working. The wrapper div.tbl-cargos-wrap with overflow-x:auto plus table.tbl-cargos with min-width:900px keeps the concurso jobs table horizontally scrollable inside its container on mobile without leaking overflow to body. Desktop unaffected. Other tables on same page still stack cell-per-row on mobile as intended."
+}

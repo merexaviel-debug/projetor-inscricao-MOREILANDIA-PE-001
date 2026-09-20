@@ -70,12 +70,51 @@
   h1, h2, .Arial13-Negrito { font-size: 18px !important; line-height: 1.3 !important; }
   h3 { font-size: 15px !important; }
   p { font-size: 13px !important; line-height: 1.4 !important; }
-  /* Tabela de cargos: rolagem horizontal em vez de empilhar (não vira uma célula por linha) */
-  #centroCentro .tbl-cargos-wrap { overflow-x: auto !important; -webkit-overflow-scrolling: touch; width: 100% !important; max-width: 100% !important; margin: 0 0 12px 0 !important; border: 1px solid #e5e5e5; border-radius: 4px; }
-  #centroCentro .tbl-cargos-wrap::before { content: "\21D4  Arraste para o lado para ver todas as colunas"; display: block; font-size: 11px; color: #666; padding: 6px 8px; background: #fafafa; border-bottom: 1px solid #eee; }
-  #centroCentro table.tbl-cargos, #centroCentro table.tbl-cargos tbody, #centroCentro table.tbl-cargos thead, #centroCentro table.tbl-cargos tfoot { display: table !important; width: auto !important; min-width: 900px !important; max-width: none !important; }
+  /* Tabela de cargos: rolagem horizontal com fontes reduzidas e largura extra */
+  #centroCentro { padding: 0 !important; }
+  /* Reduz paddings dos containers pai que espremem o quadro de vagas no mobile */
+  #centroCentro .bloco { padding: 6px 2px !important; }
+  #centroCentro .TabbedPanelsContent { padding: 6px 2px !important; }
+  #centroCentro .TabbedPanels td,
+  #centroCentro .TabbedPanelsContent > td,
+  #centroCentro table:has(> tbody > tr > td > #impressao) td,
+  #centroCentro #impressao { padding: 0 !important; }
+  #centroCentro #impressao > table { padding: 0 !important; }
+  /* Wrapper do quadro de vagas: usar a largura toda do centroCentro */
+  #centroCentro .tbl-cargos-wrap {
+    overflow-x: auto !important; -webkit-overflow-scrolling: touch;
+    width: 100% !important; max-width: 100% !important;
+    margin: 0 0 12px 0 !important;
+    border: 1px solid #e5e5e5; border-radius: 4px;
+  }
+  #centroCentro .tbl-cargos-wrap::before {
+    content: "\21D4  Arraste para o lado para ver todas as colunas";
+    display: block; font-size: 10px; color: #666;
+    padding: 4px 6px; background: #fafafa; border-bottom: 1px solid #eee;
+  }
+  #centroCentro table.tbl-cargos, #centroCentro table.tbl-cargos tbody, #centroCentro table.tbl-cargos thead, #centroCentro table.tbl-cargos tfoot {
+    display: table !important; width: auto !important; min-width: 760px !important; max-width: none !important;
+  }
   #centroCentro table.tbl-cargos tr { display: table-row !important; width: auto !important; }
-  #centroCentro table.tbl-cargos td, #centroCentro table.tbl-cargos th { display: table-cell !important; width: auto !important; max-width: none !important; white-space: normal !important; padding: 6px 8px !important; font-size: 12px !important; border: 1px solid #eee !important; vertical-align: middle !important; }
+  #centroCentro table.tbl-cargos td, #centroCentro table.tbl-cargos th {
+    display: table-cell !important; width: auto !important; max-width: none !important;
+    white-space: normal !important; padding: 3px 4px !important;
+    font-size: 9.5px !important; line-height: 1.2 !important;
+    border: 1px solid #eee !important; vertical-align: middle !important;
+    word-break: normal !important; overflow-wrap: normal !important;
+  }
+  #centroCentro table.tbl-cargos td b, #centroCentro table.tbl-cargos th b,
+  #centroCentro table.tbl-cargos td strong, #centroCentro table.tbl-cargos th strong,
+  #centroCentro table.tbl-cargos td .Arial-11-Negrito, #centroCentro table.tbl-cargos th .Arial-11-Negrito,
+  #centroCentro table.tbl-cargos td .Arial11, #centroCentro table.tbl-cargos th .Arial11 {
+    font-size: 9.5px !important; line-height: 1.2 !important;
+  }
+  /* Coluna Cód. (1ª): não quebrar linha do código "001", etc */
+  #centroCentro table.tbl-cargos tr > td:first-child,
+  #centroCentro table.tbl-cargos tr > th:first-child {
+    white-space: nowrap !important; text-align: center !important;
+    padding: 3px 6px !important; min-width: 32px !important;
+  }
 }
   #topoCentro { padding: 4px !important; }
   #menuCentro a { font-size: 11px !important; padding: 6px 5px !important; }
