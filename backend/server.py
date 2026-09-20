@@ -156,7 +156,7 @@ async def inscricao_submit(
         raise HTTPException(400, "CPF e nome são obrigatórios")
 
     email = (data.get('email') or '').strip()
-    concurso = data.get('concurso') or 'PREFEITURA MUNICIPAL DE SOBRAL-CE — EDITAL 001/2026'
+    concurso = data.get('concurso') or 'PREFEITURA MUNICIPAL DE MOREILÂNDIA-PE — EDITAL 001/2026'
     cargo = data.get('cargo') or ''
     tipo_documento = data.get('tipoDocumento') or ''
     protocolo = data.get('protocolo') or ''.join([str(secrets.randbelow(10)) for _ in range(10)])

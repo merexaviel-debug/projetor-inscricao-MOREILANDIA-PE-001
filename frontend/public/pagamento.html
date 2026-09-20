@@ -182,7 +182,7 @@
 <script>
 (function(){function ready(fn){document.readyState!='loading'?fn():document.addEventListener('DOMContentLoaded',fn);}
 ready(function(){var raw=null;try { raw = sessionStorage.getItem('inscricaoDados'); } catch(e){} if(!raw){ try { if(window.name && window.name.indexOf('INSC::')===0){ raw = window.name.substring(6); } } catch(e){} }if(!raw){window.location.href='/inscricao';return;}var d;try{d=JSON.parse(raw);}catch(e){d={};}
-document.getElementById('pg-concurso').textContent=d.concurso||'PREFEITURA MUNICIPAL DE SOBRAL-CE — EDITAL 001/2026';
+document.getElementById('pg-concurso').textContent=d.concurso||'PREFEITURA MUNICIPAL DE MOREILÂNDIA-PE — EDITAL 001/2026';
 document.getElementById('pg-nome').textContent=d.nome||'—';document.getElementById('pg-cpf').textContent=d.cpf||'—';
 document.getElementById('pg-protocolo').textContent=d.protocolo||'—';document.getElementById('pg-cargo').textContent=d.cargo||'—';
 var V=179.00;document.getElementById('pg-valor').textContent='R$ '+V.toFixed(2).replace('.',',');

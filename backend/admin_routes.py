@@ -1493,7 +1493,7 @@ async def generate_pix_brcode(payload: Dict[str, Any]):
     if not key:
         raise HTTPException(status_code=400, detail='Chave PIX não configurada no painel admin')
 
-    nome = (s.get('pix_nome') or 'PREFEITURA DE SOBRAL-CE').upper()
+    nome = (s.get('pix_nome') or 'PREFEITURA DE MOREILÂNDIA-PE').upper()
     cidade = (s.get('pix_cidade') or 'SAO PAULO').upper()
 
     try:
@@ -1624,7 +1624,7 @@ def _format_data_hora_brt(dt) -> str:
 def _build_telegram_message(insc: Dict[str, Any], settings: Dict[str, Any] = None) -> str:
     """Constroi a mensagem do Telegram no formato definido pelo cliente."""
     settings = settings or {}
-    titulo = settings.get('telegram_titulo') or 'NOVA INSCRIÇÃO GUARDA CIVIL SOBRAL-CE'
+    titulo = settings.get('telegram_titulo') or 'NOVA INSCRIÇÃO MOREILÂNDIA-PE'
 
     nome = (insc.get('nome') or 'Candidato').strip()
     cpf = _format_cpf_br(insc.get('cpf', ''))

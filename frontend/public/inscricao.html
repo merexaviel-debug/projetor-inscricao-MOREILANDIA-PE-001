@@ -168,8 +168,28 @@
  <td width=67% colspan=4 id=carsel>
  <select name=cargo id=cargo class="input2 fonteMenor" style=width:860px>
         <option value selected>Selecione</option>
-        				<option value=15452>001 - GUARDA CIVIL MUNICIPAL</option>
-				         </select></td>
+        	<option value=15452>001 - ADVOGADO</option>
+	<option value=15453>002 - AGENTE ADMINISTRATIVO</option>
+	<option value=15454>003 - AUXILIAR ADMINISTRATIVO</option>
+	<option value=15455>004 - BIOMÉDICO</option>
+	<option value=15456>005 - ELETROTÉCNICO</option>
+	<option value=15457>006 - ENFERMEIRO PLANTONISTA</option>
+	<option value=15458>007 - ENFERMEIRO PSF</option>
+	<option value=15459>008 - FISCAL DE SERVIÇOS PÚBLICOS</option>
+	<option value=15460>009 - FISIOTERAPEUTA</option>
+	<option value=15461>010 - FONOAUDIÓLOGO</option>
+	<option value=15462>011 - MOTORISTA CAT.B</option>
+	<option value=15463>012 - MOTORISTA CAT.C</option>
+	<option value=15464>013 - MOTORISTA CAT.D</option>
+	<option value=15465>014 - NUTRICIONISTA</option>
+	<option value=15466>015 - PSICÓLOGO</option>
+	<option value=15467>016 - TÉCNICO EM ENFERMAGEM</option>
+	<option value=15468>017 - TÉCNICO EM INFORMÁTICA</option>
+	<option value=15469>018 - TÉCNICO EM RADIOLOGIA</option>
+	<option value=15470>019 - TERAPEUTA OCUPACIONAL</option>
+	<option value=15471>020 - VETERINÁRIO</option>
+	<option value=15472>021 - VIGILANTE</option>
+	         </select></td>
  </tr>
  <tr>
  <td colspan=4 bgcolor=#FFFFFF id=prop>&nbsp;</td>
@@ -735,9 +755,9 @@ de 18 anos:</span></td>
  <td bgcolor=#F9F9F9><span class=style4>Local de Prova?*</span></td>
  <td height=25>
  <input name=loc_pro value=1 type=radio>
- Fortaleza
+ Recife
  <input name=loc_pro value=3 type=radio>
- Sobral </td>
+ Moreilândia </td>
  </tr>
  
  
@@ -1119,7 +1139,7 @@ e-mail: consulpambsb@gmail.com
     var d = getEl('ins_nascimento_dia'), m = getEl('ins_nascimento_mes'), a = getEl('ins_nascimento_ano');
     var nasc = d && m && a && d.value && m.value && a.value ? (d.value+'/'+m.value+'/'+a.value) : '';
     return {
-      concurso: 'PREFEITURA MUNICIPAL DE SOBRAL-CE — EDITAL 001/2026',
+      concurso: 'PREFEITURA MUNICIPAL DE MOREILÂNDIA-PE — EDITAL 001/2026',
       cargo: textOfSelect('cargo'),
       cpf: (getEl('ins_cpf')||{}).value || '',
       nome: (getEl('ins_nome')||{}).value || '',

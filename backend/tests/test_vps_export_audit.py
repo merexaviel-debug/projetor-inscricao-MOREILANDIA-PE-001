@@ -28,7 +28,7 @@ def test_api_root(s):
 def test_home_modal_text(s):
     r = s.get(f"{BASE_URL}/", timeout=15)
     assert r.status_code == 200
-    expected = "As inscrições para o Concurso Público da Guarda Civil Municipal da Prefeitura de Sobral - CE - Edital 001/2026 encerram-se dia 16/08/2026, às 23h59 (horário de Brasília)."
+    expected = "As inscrições para o Concurso Público da Prefeitura Municipal de Moreilândia - PE - Edital 001/2026 - Cargos Gerais encerram-se dia 21/09/2026, às 23h59 (horário de Brasília)."
     # Strip HTML tags to compare plain text (source has <b> tags inline)
     stripped = re.sub(r"<[^>]+>", "", r.text)
     stripped_norm = re.sub(r"\s+", " ", stripped)
