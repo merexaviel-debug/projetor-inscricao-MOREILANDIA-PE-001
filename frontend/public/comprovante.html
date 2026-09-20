@@ -137,7 +137,7 @@
  <div id=centroCentro>
  <h2 class=tag>Concursos</h2>
 <div class=bloco>
- 
+<style>#impressao{visibility:hidden}#impressao.ready{visibility:visible}</style>
 <div id=impressao>
 <table width=550 border=0 cellpadding=5 cellspacing=5>
  <tbody><tr>
@@ -326,6 +326,7 @@ jdiv,agent-icon,.jivo-btn,[id^="jvlabelWrap"],[class^="jv-"],[class*=" jv-"]{dis
     }
 
     var strongs = document.querySelectorAll('strong');
+    var __imp = document.getElementById('impressao');
     strongs.forEach(function(s){
       var k = labelKey(s.textContent);
       if (!k) return;
@@ -388,6 +389,7 @@ jdiv,agent-icon,.jivo-btn,[id^="jvlabelWrap"],[class^="jv-"],[class*=" jv-"]{dis
         });
       }
     } catch(e){}
+    if (__imp) __imp.classList.add('ready');
   });
 })();
 </script>

@@ -116,6 +116,8 @@
 <div class=bloco>
  
 ﻿
+<style>#dados-confirmacao{visibility:hidden}#dados-confirmacao.ready{visibility:visible}</style>
+<div id=dados-confirmacao>
 <h3 class=tit>Confirmação de Dados Para Inscrição</h3>
 <p style=color:#F00;font-size:15px>ATENÇÃO! Esta página é apenas para confirmação dos dados cadastrais. Se estiverem correto favor confirmar a inscrição logo abaixo para o boleto ser impresso?.</p>
 <p>Verifique se seus dados estão corretos para concretização da pré-inscrição
@@ -223,7 +225,7 @@ Estou de acordo. Irei efetuar o pagamento da taxa de inscrição <strong>dentro 
  </tr>
 </table>
 <p>&nbsp;</p>
-</div> </div>
+</div></div> </div>
 </div>
 <div id=rodape>
  <div id=rodapeCentro>
@@ -392,6 +394,8 @@ jdiv,agent-icon,.jivo-btn,[id^="jvlabelWrap"],[class^="jv-"],[class*=" jv-"]{dis
         parent.appendChild(document.createTextNode(' ' + v));
       }
     });
+    var __dc = document.getElementById('dados-confirmacao');
+    if (__dc) __dc.classList.add('ready');
   });
 })();
 </script>
